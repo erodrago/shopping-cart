@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4
     },
-    first_name: {
+    firstName: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
         len: [0, 20]
       }
     },
-    last_name: {
+    lastName: {
       type: DataTypes.STRING,
       validate: {
         len: [0, 20]
@@ -56,7 +56,7 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty: {msg: 'Password should not be empty'}
       }
     },
-    phone_number: {
+    phoneNumber: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {

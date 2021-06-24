@@ -17,11 +17,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   OrderDetail.init({
-    total_amount: {
+    totalAmount: {
       type:DataTypes.INTEGER,
       allowNull:false
     },
-    order_time: {
+    orderTime: {
       type: DataTypes.DATE,
       allowNull: false
     }

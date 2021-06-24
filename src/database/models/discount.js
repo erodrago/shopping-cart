@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     description: {
       type: DataTypes.TEXT,
     },
-    percentage_off: {
+    percentageOff: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
