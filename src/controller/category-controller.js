@@ -6,7 +6,7 @@ exports.createCategory = async (req, res) => {
     // validate body
     if (!name || !description) {
         return res.status(400).send({
-            message: 'Please provide a firstname, Categoryname and a password to create a Category!',
+            message: 'Please provide a name and description to create a Category!',
         });
     }
 
