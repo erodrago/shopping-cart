@@ -24,14 +24,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    order_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    product_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    }
   }, {
     sequelize,
     tableName: 'order_items',
