@@ -2,6 +2,7 @@
 const {
   Model
 } = require('sequelize');
+const product = require('./product');
 module.exports = (sequelize, DataTypes) => {
   class Discount extends Model {
     /**
@@ -11,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      this.hasOne(Product, {foreignKey: 'discount_id'})
     }
   };
   Discount.init({
