@@ -1,4 +1,4 @@
-const { User } = require('../database/models');
+const { User, CartSession } = require('../database/models');
 const paginate = require('../helpers/paginate')
 
 exports.createUser = async (req, res) => {
@@ -32,6 +32,12 @@ exports.createUser = async (req, res) => {
             password,
             phoneNumber
         });
+
+        await CartSession.create({
+            totalAmount: 0,
+            user_id: newUser.id
+        });
+
         return res.send(newUser);
     } catch (err) {
         return res.status(500).send({
