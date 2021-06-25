@@ -91,3 +91,21 @@ exports.removeItemFromCart = async (req, res) => {
         });
     }
 };
+
+exports.getAllCartItems = (req, res) => {
+    const { sessionId } = req.params;
+
+    // get cart items
+    try {
+        const cartItems = await CartItem.findAll({
+            where: {session_id: sessionId}
+        })
+
+        return res.send(cartItems);
+    } catch (err) {
+        return res.status(500).send({
+            message: `Error: ${err.message}`,
+        });
+    }
+    
+}
