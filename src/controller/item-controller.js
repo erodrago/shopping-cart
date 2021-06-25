@@ -1,4 +1,4 @@
-const { CartItem, OrderItem, CartSession} = require('../database/models');
+const { CartItem, CartSession} = require('../database/models');
 
 exports.addItemToCart = async (req, res) => {
     const { quantity, amount, productId } = req.body;
@@ -33,14 +33,25 @@ exports.addItemToCart = async (req, res) => {
         })
     }
 
+    // increase total amount of items
+    const totalAmount = session.totalAmount + (quantity * amount);
+
     try {
-        let newCartItem = await CartItem.create({
+        await CartItem.create({
             quantity,
             amount,
             product_id: productId,
             session_id: sessionId
+        }).then(() => {
+            // update session info
+            session.total_amount = totalAmount;
+
+            session.save();
         });
-        return res.send(newCartItem);
+
+        return res.send({
+            message: `Iem added to cart`
+        });
     } catch (err) {
         return res.status(500).send({
             message: `Error: ${err.message}`,
@@ -80,10 +91,17 @@ exports.removeItemFromCart = async (req, res) => {
         });
     }
 
+    // decrease total amount of items
+    const totalAmount = session.totalAmount - (cartItem.quantity * cartItem.amount);
+
     try {
-        await cartItem.destroy();
+        await cartItem.destroy().then(() => {
+            session.total_amount = totalAmount;
+
+            session.save();
+        });
         return res.send({
-            message: `Item ${id} has been deleted!`,
+            message: `Item has been removed from cart!`,
         });
     } catch (err) {
         return res.status(500).send({
