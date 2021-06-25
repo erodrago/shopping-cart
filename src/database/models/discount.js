@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate({Product}) {
       // define association here
-      this.hasOne(Product, {foreignKey: 'discount_id'})
+      this.hasOne(Product, {foreignKey: 'discount_id', as: 'product'})
     }
   };
   Discount.init({
