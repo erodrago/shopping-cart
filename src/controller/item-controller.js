@@ -119,7 +119,14 @@ exports.getAllCartItems = (req, res) => {
             where: {session_id: sessionId}
         })
 
-        return res.send(cartItems);
+        const session = await CartSession.findOne({
+            where: {id: sessionId}
+        })
+
+        return res.send({
+            cartItems: cartItems,
+            totalAmount: session.total_amount
+        });
     } catch (err) {
         return res.status(500).send({
             message: `Error: ${err.message}`,
