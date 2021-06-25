@@ -1,4 +1,5 @@
 const { Category } = require('../database/models');
+const paginate = require('../helpers/paginate')
 
 exports.createCategory = async (req, res) => {
     const { name, description } = req.body;
@@ -38,8 +39,18 @@ exports.createCategory = async (req, res) => {
 };
 
 exports.getAllCategories = async (req, res) => {
+    const {page, size} = req.query;
+
+    if(!page || !size){
+        return res.status(400).send({
+            message: 'Requires page and size request params',
+        });
+    }
+
     try {
-        const categories = await Category.findAll();
+        const categories = await Category.findAll({
+            ...paginate({page, size})
+        });
 
         return res.send(categories);
     } catch(err) {

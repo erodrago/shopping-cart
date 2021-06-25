@@ -1,4 +1,5 @@
 const { User } = require('../database/models');
+const paginate = require('../helpers/paginate')
 
 exports.createUser = async (req, res) => {
     const { firstName, lastName, username, password, phoneNumber} = req.body;
@@ -40,8 +41,18 @@ exports.createUser = async (req, res) => {
 };
 
 exports.getAllUsers = async (req, res) => {
+    const {page, size} = req.query;
+
+    if(!page || !size){
+        return res.status(400).send({
+            message: 'Requires page and size request params',
+        });
+    }
+
     try {
-        const users = await User.findAll();
+        const users = await User.findAll({
+            ...paginate({page, size})
+        });
 
         return res.send(users);
     } catch(err) {

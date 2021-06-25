@@ -1,4 +1,5 @@
 const { Discount } = require('../database/models');
+const paginate = require('../helpers/paginate');
 
 exports.createDiscount = async (req, res) => {
     const { name, description, percentageOff, active } = req.body;
@@ -40,8 +41,18 @@ exports.createDiscount = async (req, res) => {
 };
 
 exports.getAllDiscounts = async (req, res) => {
+    const {page, size} = req.query;
+
+    if(!page || !size){
+        return res.status(400).send({
+            message: 'Requires page and size request params',
+        });
+    }
+
     try {
-        const discounts = await Discount.findAll();
+        const discounts = await Discount.findAll({
+            ...paginate({page, size})
+        });
 
         return res.send(discounts);
     } catch(err) {

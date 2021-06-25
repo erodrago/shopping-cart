@@ -1,4 +1,5 @@
 const { Product, Category, Discount } = require('../database/models');
+const paginate = require('../helpers/paginate');
 
 exports.createProduct = async (req, res) => {
     const { name, description, sku, quantity, price, categoryId, discountId } = req.body;
@@ -65,9 +66,18 @@ exports.createProduct = async (req, res) => {
 };
 
 exports.getAllProducts = async (req, res) => {
+    const {page, size} = req.query;
+
+    if(!page || !size){
+        return res.status(400).send({
+            message: 'Requires page and size request params',
+        });
+    }
+
     try {
         const products = await Product.findAll({
-            include: ['discount', 'category']
+            ...paginate({page, size}),
+            include: ['discount', 'category'],
         });
 
         return res.send(products);
