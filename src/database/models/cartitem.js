@@ -29,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'cart_items',
     underscored: true,
     modelName: 'CartItem',
+    timestamps: false
   });
   return CartItem;
 };
