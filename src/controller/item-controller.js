@@ -132,7 +132,7 @@ exports.getAllCartItems = async (req, res) => {
 
         return res.send({
             cartItems: cartItems,
-            totalAmount: session.total_amount
+            totalAmount: session.totalAmount
         });
     } catch (err) {
         return res.status(500).send({
