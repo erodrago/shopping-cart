@@ -1,13 +1,19 @@
 const router = require('./user-routes');
-const UserRoute = require('./user-routes');
-const CategoryRoute = require('./category-routes');
-const DiscountRoute = require('./discount-routes');
-const ProductRoute = require('./product-routes');
+const userRoute = require('./user-routes');
+const categoryRoute = require('./category-routes');
+const discountRoute = require('./discount-routes');
+const productRoute = require('./product-routes');
+const cartItemRoute = require('./item-router');
+const paymentRoute = require('./payment-routes');
+const orderRoute = require('./order-routes');
 
 
-router.use('/user', UserRoute);
-router.use('/category', CategoryRoute);
-router.use('/discount', DiscountRoute);
-router.use('/product', ProductRoute);
+router.use('/user', userRoute);
+router.use('/category', categoryRoute);
+router.use('/discount', discountRoute);
+router.use('/product', productRoute);
+router.use('/cart', cartItemRoute);
+router.use('/payment', paymentRoute);
+router.use('/order', orderRoute);
 
 module.exports = router;
