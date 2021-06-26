@@ -9,10 +9,10 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(models) {
+    static associate({CartSession, OrderDetail}) {
       // define association here
       this.hasOne(CartSession, {foreignKey: 'user_id', as: 'cart_session'});
-      this.hasMany(OrderDetails, {foreignKey: 'user_id'})
+      this.hasMany(OrderDetail, {foreignKey: 'user_id'})
     }
 
     toJSON() {
@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4
     },
-    first_name: {
+    firstName: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
         len: [0, 20]
       }
     },
-    last_name: {
+    lastName: {
       type: DataTypes.STRING,
       validate: {
         len: [0, 20]
@@ -56,7 +56,7 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty: {msg: 'Password should not be empty'}
       }
     },
-    phone_number: {
+    phoneNumber: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
@@ -68,6 +68,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     tableName: 'users',
+    underscored: true,
     modelName: 'User',
   });
   return User;

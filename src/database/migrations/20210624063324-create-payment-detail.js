@@ -8,10 +8,6 @@ module.exports = {
         primaryKey: true,
         type: DataTypes.INTEGER
       },
-      order_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-      },
       amount: {
         type: DataTypes.INTEGER,
         allowNull: false
