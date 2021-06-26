@@ -33,19 +33,37 @@ exports.addItemToCart = async (req, res) => {
         })
     }
 
+    const amount = quantity * product.price;
     // increase total amount of items
-    const totalAmount = session.totalAmount + (quantity * product.price);
+    const totalAmount = session.totalAmount + amount;
+
+    // check if the item exists and update
+    const cartItem = await CartItem.findOne({
+        where: {
+            session_id: sessionId,
+            product_id: product.id
+        }
+    })
 
     try {
-        await CartItem.create({
-            quantity,
-            amount: totalAmount,
-            product_id: productId,
-            session_id: sessionId
-        });
+        if(cartItem){
+            // update existing cart item
+            cartItem.amount += amount;
+            cartItem.quantity += quantity;
+
+            cartItem.save();
+        }else {
+            // create new cart item
+            await CartItem.create({
+                quantity,
+                amount: amount,
+                product_id: productId,
+                session_id: sessionId
+            });
+        }
         
         // update session details
-        session.totalAmount += totalAmount;
+        session.totalAmount = totalAmount;
 
         session.save();
     
@@ -63,7 +81,7 @@ exports.addItemToCart = async (req, res) => {
 exports.removeItemFromCart = async (req, res) => {
     const { sessionId, id } = req.params;
 
-    if (!id || sessionId) {
+    if (!id || !sessionId) {
         return res.status(400).send({
             message: 'Please provide sessionId and ID of item to delete',
         });
@@ -94,10 +112,11 @@ exports.removeItemFromCart = async (req, res) => {
 
     // decrease total amount of items
     const totalAmount = session.totalAmount - (cartItem.quantity * cartItem.amount);
+    console.log(totalAmount);
 
     try {
         await cartItem.destroy().then(() => {
-            session.total_amount = totalAmount;
+            session.totalAmount = totalAmount;
 
             session.save();
         });
