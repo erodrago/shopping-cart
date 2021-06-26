@@ -1,13 +1,13 @@
-const { CartItem, CartSession} = require('../database/models');
+const { CartItem, CartSession, Product} = require('../database/models');
 
 exports.addItemToCart = async (req, res) => {
-    const { quantity, amount, productId } = req.body;
+    const { quantity, productId } = req.body;
     const { sessionId } = req.params;
 
     // validate body
-    if (!quantity || !amount || !productId || !sessionId) {
+    if (!quantity || !productId || !sessionId) {
         return res.status(400).send({
-            message: `Amount quantity and/or product required have not been provided!`,
+            message: `Quantity and/or product required have not been provided!`,
         });
     }
 
@@ -34,23 +34,24 @@ exports.addItemToCart = async (req, res) => {
     }
 
     // increase total amount of items
-    const totalAmount = session.totalAmount + (quantity * amount);
+    const totalAmount = session.totalAmount + (quantity * product.price);
 
     try {
         await CartItem.create({
             quantity,
-            amount,
+            amount: totalAmount,
             product_id: productId,
             session_id: sessionId
-        }).then(() => {
-            // update session info
-            session.total_amount = totalAmount;
-
-            session.save();
         });
+        
+        // update session details
+        session.totalAmount += totalAmount;
+
+        session.save();
+    
 
         return res.send({
-            message: `Iem added to cart`
+            message: `Item added to cart`
         });
     } catch (err) {
         return res.status(500).send({
@@ -110,18 +111,24 @@ exports.removeItemFromCart = async (req, res) => {
     }
 };
 
-exports.getAllCartItems = (req, res) => {
+exports.getAllCartItems = async (req, res) => {
     const { sessionId } = req.params;
+
+    if(!sessionId) {
+        return res.status(400).send({
+            message: 'Please provide sessionId!!',
+        });
+    }
 
     // get cart items
     try {
         const cartItems = await CartItem.findAll({
             where: {session_id: sessionId}
-        })
+        });
 
         const session = await CartSession.findOne({
             where: {id: sessionId}
-        })
+        });
 
         return res.send({
             cartItems: cartItems,
