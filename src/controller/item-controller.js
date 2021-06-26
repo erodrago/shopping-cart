@@ -79,7 +79,7 @@ exports.addItemToCart = async (req, res) => {
 };
 
 exports.removeItemFromCart = async (req, res) => {
-    const { sessionId, id } = req.params;
+    const { sessionId, id, type } = req.params;
 
     if (!id || !sessionId) {
         return res.status(400).send({
@@ -111,15 +111,29 @@ exports.removeItemFromCart = async (req, res) => {
     }
 
     // decrease total amount of items
-    const totalAmount = session.totalAmount - (cartItem.quantity * cartItem.amount);
-    console.log(totalAmount);
 
     try {
-        await cartItem.destroy().then(() => {
-            session.totalAmount = totalAmount;
+        if(type=='all'){
+            await cartItem.destroy().then(() => {
+                const totalAmount = session.totalAmount - (cartItem.amount);
 
-            session.save();
-        });
+                session.totalAmount = totalAmount;
+                session.save();
+            });
+        } else {
+            // decrease cart items by 1
+            const oneItemPrice = cartItem.amount / cartItem.quantity;
+            cartItem.amount -= oneItemPrice;
+            cartItem.quantity -= 1;
+
+            cartItem.save();
+
+            //update session
+            const totalAmount = session.totalAmount - oneItemPrice;
+            session.totalAmount = totalAmount;
+            session.save(); 
+        }
+
         return res.send({
             message: `Item has been removed from cart!`,
         });
