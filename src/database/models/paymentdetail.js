@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
   };
   PaymentDetail.init({
     amount: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DOUBLE,
       allowNull: false
     },
     payment_time: {

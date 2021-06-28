@@ -1,16 +1,40 @@
 require('dotenv').config();
 const express = require('express');
-const { port } = require('./config/config');
+const logger = require('morgan');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 
 const { sequelize } = require('./database/models');
 const routes = require('./routes/routes');
 
 const PORT = process.env.PORT || 3030;
 
+// setting up swagger
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Shopping cart APIs',
+      version: '1.0.0',
+      description: 'Simple shopping cart library API'
+    },
+    servers: [
+        {
+            url: `http://localhost:${PORT}/`
+        }
+    ],
+  },
+  apis: [`${__dirname}/routes/*.js`], // files containing annotations as above
+};
+
+const specs = swaggerJsdoc(options);
+
 const app = express();
 
 app.use(express.json());
+app.use(logger('dev'));
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/api/v1', routes);
 
 // when wrong url path is entered
@@ -19,7 +43,10 @@ app.use((req, res) => {
 })
 
 app.listen(PORT, async () => {
-    console.log(`Shopping cart server running on port ${port}`);
+    console.log(`Shopping cart server running on port ${PORT}`);
     await sequelize.authenticate();
     console.log("Database connected");
 })
+
+// for testing
+module.exports = app;

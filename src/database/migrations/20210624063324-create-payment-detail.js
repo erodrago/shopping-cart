@@ -9,7 +9,7 @@ module.exports = {
         type: DataTypes.INTEGER
       },
       amount: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DOUBLE,
         allowNull: false
       },
       payment_time: {

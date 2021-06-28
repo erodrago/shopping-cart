@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
   };
   OrderDetail.init({
     totalAmount: {
-      type:DataTypes.INTEGER,
+      type:DataTypes.DOUBLE,
       allowNull:false
     },
     orderTime: {

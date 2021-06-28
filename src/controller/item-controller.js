@@ -33,6 +33,13 @@ exports.addItemToCart = async (req, res) => {
         })
     }
 
+    // check if products are available
+    if (product.quantity < quantity) {
+        return res.status(404).send({
+            message: `Stock is sold out`
+        })
+    }
+
     let amount = 0;
 
     // check if product has a discount

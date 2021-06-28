@@ -1,11 +1,11 @@
-const { OrderItem, OrderDetail, CartItem, CartSession, PaymentDetail, User } = require('../database/models');
+const { OrderItem, OrderDetail, CartItem, CartSession, PaymentDetail, User, Product } = require('../database/models');
 const paginate = require('../helpers/paginate');
 
 exports.postOrderItems = async (req, res) => {
     const { totalAmount, paymentProvider, status, params } = req.body;
     const { sessionId } = req.params;
 
-    if (!totalAmount || !paymentProvider || !status || !params || !sessionId) {
+    if (!totalAmount || totalAmount == 0 || !paymentProvider || !status || !params || !sessionId) {
         return res.status(400).send({
             message: 'Please provide totalAmount, paymentProvider, status and params of item to delete',
         });
@@ -18,7 +18,7 @@ exports.postOrderItems = async (req, res) => {
 
     if(session.totalAmount != totalAmount){
         return res.status(400).send({
-            message: 'Amount is less than the price of items',
+            message: 'Amount is not equal to the price of items',
         });
     }
 
@@ -64,12 +64,22 @@ exports.postOrderItems = async (req, res) => {
         // copy cart items to order items and delete upon succesful purchase
         // bulk save 
         for(const cartItem of cartItems) {
-            await OrderItem.create({
+            const orderitem = await OrderItem.create({
                 product_id: cartItem.product_id,
                 order_id: order.id,
                 quantity: cartItem.quantity,
                 amount: cartItem.amount
             })
+
+            // get product 
+            const product = Product.findOne({
+                where: {
+                    product_id: orderitem.product_id
+                }
+            })
+
+            product.quantity -= orderitem.quantity;
+            product.save();
         }
         // reset session
         session.totalAmount = 0;
