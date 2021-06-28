@@ -1,4 +1,5 @@
-const { OrderItem, OrderDetail, CartItem, CartSession, PaymentDetail } = require('../database/models');
+const { OrderItem, OrderDetail, CartItem, CartSession, PaymentDetail, User } = require('../database/models');
+const paginate = require('../helpers/paginate');
 
 exports.postOrderItems = async (req, res) => {
     const { totalAmount, paymentProvider, status, params } = req.body;
@@ -79,6 +80,46 @@ exports.postOrderItems = async (req, res) => {
     } catch (err) {
         return res.status(500).send({
             message: `Error: ${err.message}`,
+        });
+    }
+}
+
+exports.getUserTransactions = async (req, res) => {
+    const { uuid } = req.params;
+    const { size, page } = req.query;
+
+    if( !uuid ) {
+        return res.status(400).send({
+            message: `Please provide user identifier!!`
+        });
+    }
+
+    const user = await User.findOne({
+        where: {
+            uuid: uuid
+        }
+    })
+
+    if(!user) {
+        return res.status(400).send({
+            message: `The user does not exist`
+        })
+    }
+
+
+    try {
+        const orders = await OrderDetail.findAll({
+            where: {
+                    user_id: user.id
+                },
+                ...paginate({page, size}),
+                include: ['orderItems', 'payment']
+        });
+
+        return res.send(orders);
+    } catch(err){
+        return res.status(500).send({
+            message: `Error: ${err.message}`
         });
     }
 }
