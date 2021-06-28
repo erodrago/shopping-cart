@@ -1,6 +1,5 @@
 const router = require('express').Router();
 const CategoryController = require('../controller/category-controller.js');
-const Category = require('../database/models/category.js');
 
 /**
  * @swagger
@@ -49,8 +48,8 @@ const Category = require('../database/models/category.js');
 /**
   * @swagger
   * tags:
-  *   name: Category
-  *   description: THis are apis for management of categories
+  *   name: Category Controller
+  *   description: This are apis for management of categories
   */
 
 
@@ -59,7 +58,7 @@ const Category = require('../database/models/category.js');
  * /api/v1/category/create:
  *   post:
  *     summary: Create a new category
- *     tags: [Category]
+ *     tags: [Category Controller]
  *     requestBody:
  *       required: true
  *       content:
@@ -85,7 +84,7 @@ router.post('/create', CategoryController.createCategory);
  * /api/v1/category/all:
  *   get:
  *     summary: Returns the list of all created categories
- *     tags: [Category]
+ *     tags: [Category Controller]
  *     parameters:
  *       - in: query
  *         name: page
@@ -116,7 +115,7 @@ router.get('/all', CategoryController.getAllCategories);
  * /api/v1/category/{id}:
  *   get:
  *     summary: Returns a category that matches the id
- *     tags: [Category]
+ *     tags: [Category Controller]
  *     parameters:
  *       - in: path
  *         name: id
@@ -139,7 +138,7 @@ router.get('/:id', CategoryController.getCategoryById);
  * /api/v1/category/{id}:
  *   put:
  *     summary: Updates a category that matches the id
- *     tags: [Category]
+ *     tags: [Category Controller]
  *     requestBody:
  *       required: true
  *       content:
@@ -168,11 +167,11 @@ router.put('/:id', CategoryController.updateCategory);
  * /api/v1/category/{id}:
  *   delete:
  *     summary: Deletes a category
- *     tags: [Category]
+ *     tags: [Category Controller]
  *     parameters:
  *       - in: path
  *         name: id
- *         description: no of pages to retrieve
+ *         description: id of a category
  *         required: true   
  *         schema:
  *           type: integer
