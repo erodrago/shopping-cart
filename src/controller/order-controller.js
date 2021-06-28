@@ -1,4 +1,4 @@
-const { OrderItem, OrderDetail, CartItem, CartSession, PaymentDetail, User } = require('../database/models');
+const { OrderItem, OrderDetail, CartItem, CartSession, PaymentDetail, User, Product } = require('../database/models');
 const paginate = require('../helpers/paginate');
 
 exports.postOrderItems = async (req, res) => {
@@ -64,12 +64,22 @@ exports.postOrderItems = async (req, res) => {
         // copy cart items to order items and delete upon succesful purchase
         // bulk save 
         for(const cartItem of cartItems) {
-            await OrderItem.create({
+            const orderitem = await OrderItem.create({
                 product_id: cartItem.product_id,
                 order_id: order.id,
                 quantity: cartItem.quantity,
                 amount: cartItem.amount
             })
+
+            // get product 
+            const product = Product.findOne({
+                where: {
+                    product_id: orderitem.product_id
+                }
+            })
+
+            product.quantity -= orderitem.quantity;
+            product.save();
         }
         // reset session
         session.totalAmount = 0;
