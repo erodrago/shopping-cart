@@ -5,7 +5,7 @@ exports.postOrderItems = async (req, res) => {
     const { totalAmount, paymentProvider, status, params } = req.body;
     const { sessionId } = req.params;
 
-    if (!totalAmount || !paymentProvider || !status || !params || !sessionId) {
+    if (!totalAmount || totalAmount == 0 || !paymentProvider || !status || !params || !sessionId) {
         return res.status(400).send({
             message: 'Please provide totalAmount, paymentProvider, status and params of item to delete',
         });
@@ -18,7 +18,7 @@ exports.postOrderItems = async (req, res) => {
 
     if(session.totalAmount != totalAmount){
         return res.status(400).send({
-            message: 'Amount is less than the price of items',
+            message: 'Amount is not equal to the price of items',
         });
     }
 
