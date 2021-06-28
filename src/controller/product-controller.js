@@ -43,7 +43,7 @@ exports.createProduct = async (req, res) => {
 
     if(!discount){
         return res.status(404).send({
-            message: `The discount with id ${categoryId} does not exist!`
+            message: `The discount with id ${discountId} does not exist!`
         })
     }
 
