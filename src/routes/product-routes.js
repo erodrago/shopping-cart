@@ -43,7 +43,7 @@ const ProductController = require('../controller/product-controller');
   * @swagger
   * tags:
   *   name: Product Controller
-  *   description: This are apis for management of categories
+  *   description: This are apis for management of products
   */
 
 
