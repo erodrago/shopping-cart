@@ -17,7 +17,7 @@ module.exports = {
         allowNull: false
       },
       total_amount: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DOUBLE,
         allowNull: false
       },
       order_time: {

@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
   };
   CartSession.init({
     totalAmount: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DOUBLE,
       allowNull: false
     }
   }, {
