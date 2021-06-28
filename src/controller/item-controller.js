@@ -1,4 +1,4 @@
-const { CartItem, CartSession, Product} = require('../database/models');
+const { CartItem, CartSession, Product, Discount} = require('../database/models');
 
 exports.addItemToCart = async (req, res) => {
     const { quantity, productId } = req.body;
@@ -33,7 +33,21 @@ exports.addItemToCart = async (req, res) => {
         })
     }
 
-    const amount = quantity * product.price;
+    let amount = 0;
+
+    // check if product has a discount
+    if (product.discount_id){
+
+        const discount = await Discount.findOne({
+            where: {id: product.discount_id}
+        });
+
+        const productPrice = product.price - ( product.price * discount.percentageOff / 100 );
+        amount = quantity * productPrice;
+    }else {
+        amount = quantity * product.price;
+    }
+    
     // increase total amount of items
     const totalAmount = session.totalAmount + amount;
 

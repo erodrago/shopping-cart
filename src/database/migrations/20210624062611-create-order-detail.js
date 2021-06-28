@@ -12,6 +12,10 @@ module.exports = {
         type: DataTypes.INTEGER,
         allowNull: false
       },
+      payment_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
       total_amount: {
         type: DataTypes.INTEGER,
         allowNull: false
