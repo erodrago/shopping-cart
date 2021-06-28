@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const { port } = require('./config/config');
+const logger = require('morgan');
 
 const { sequelize } = require('./database/models');
 const routes = require('./routes/routes');
@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 3030;
 const app = express();
 
 app.use(express.json());
+app.use(logger('dev'));
 
 app.use('/api/v1', routes);
 
@@ -19,7 +20,10 @@ app.use((req, res) => {
 })
 
 app.listen(PORT, async () => {
-    console.log(`Shopping cart server running on port ${port}`);
+    console.log(`Shopping cart server running on port ${PORT}`);
     await sequelize.authenticate();
     console.log("Database connected");
 })
+
+// for testing
+module.exports = app;
