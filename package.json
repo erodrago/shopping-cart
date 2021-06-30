@@ -9,10 +9,11 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-  "test": "cross-env NODE_ENV=test jest --testTimeout=1000000",
-  "pretest": "cross-env NODE_ENV=test npm run resetdb",
-  "resetdb": "cross-env NODE_ENV=test npm run db:create:test && cross-env NODE_ENV=test npx sequelize-cli db:migrate",
-  "db:create:test": "cross-env NODE_ENV=test npx sequelize-cli db:drop && cross-env NODE_ENV=test npx sequelize-cli db:create"
+    "db:setup": "npx sequelize db:create && npx sequelize db:migrate",
+    "test": "cross-env NODE_ENV=test jest --testTimeout=1000000",
+    "pretest": "cross-env NODE_ENV=test npm run resetdb",
+    "resetdb": "cross-env NODE_ENV=test npm run db:create:test && cross-env NODE_ENV=test npx sequelize-cli db:migrate",
+    "db:create:test": "cross-env NODE_ENV=test npx sequelize-cli db:drop && cross-env NODE_ENV=test npx sequelize-cli db:create"
   },
   "repository": {
     "type": "git",
