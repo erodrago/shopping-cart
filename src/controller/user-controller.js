@@ -1,5 +1,5 @@
-const { User, CartSession } = require('../database/models');
-const paginate = require('../helpers/paginate')
+const userRepository = require('../repository/user-repository.js');
+const sessionRepository = require('../repository/session-repository.js');
 
 exports.createUser = async (req, res) => {
     const { firstName, lastName, username, password, phoneNumber} = req.body;
@@ -12,11 +12,7 @@ exports.createUser = async (req, res) => {
     }
 
     // check if user exists
-    let usernameExists = await User.findOne({
-        where: {
-            username,
-        },
-    });
+    let usernameExists = await userRepository.findUserByUsername(username);
 
     if (usernameExists) {
         return res.status(400).send({
@@ -24,16 +20,18 @@ exports.createUser = async (req, res) => {
         });
     }
 
-    try {
-        let newUser = await User.create({
+    let payload = {
             firstName,
             lastName,
             username,
             password,
             phoneNumber
-        });
+        };
 
-        await CartSession.create({
+    try {
+        let newUser = await userRepository.createUser(payload);
+
+        await sessionRepository.createCartSession({
             totalAmount: 0,
             user_id: newUser.id
         });
@@ -56,9 +54,7 @@ exports.getAllUsers = async (req, res) => {
     }
 
     try {
-        const users = await User.findAll({
-            ...paginate({page, size})
-        });
+        const users = await userRepository.findAllUsers(page, size);
 
         return res.send(users);
     } catch(err) {
@@ -71,11 +67,7 @@ exports.getAllUsers = async (req, res) => {
 exports.getUserById = async (req, res) => {
     const { uuid } = req.params;
 
-    const user = await User.findOne({
-        where: {
-            uuid,
-        },
-    });
+    const user = await userRepository.findUserById(uuid);
 
     if (!user) {
         return res.status(404).send({
@@ -95,11 +87,7 @@ exports.deleteUser = async (req, res) => {
         });
     }
 
-    const user = await User.findOne({
-        where: {
-            uuid,
-        },
-    });
+    const user = await userRepository.findUserById(uuid);
 
     if (!user) {
         return res.status(404).send({
@@ -108,7 +96,8 @@ exports.deleteUser = async (req, res) => {
     }
 
     try {
-        await user.destroy();
+        await userRepository.findByIdAndDelete(uuid);
+
         return res.send({
             message: `User ${uuid} has been deleted!`,
         });
@@ -125,11 +114,7 @@ exports.updateUser = async (req, res) => {
 
     const { uuid } = req.params;
 
-    const user = await User.findOne({
-        where: {
-            uuid,
-        },
-    });
+    const user = await userRepository.findUserById(uuid);
 
     if (!user) {
         return res.status(400).send({

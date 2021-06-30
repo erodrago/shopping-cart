@@ -19,7 +19,7 @@ const ItemController = require('../controller/item-controller');
  *           description: id of product to buy
  *       example:
  *         quantity: 3
- *         amount: 500
+ *         productId: 500
  */
 
 /**

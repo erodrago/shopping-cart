@@ -1,5 +1,4 @@
-const { Category } = require('../database/models');
-const paginate = require('../helpers/paginate')
+const categoryRepository = require('../repository/category-repository.js')
 
 exports.createCategory = async (req, res) => {
     const { name, description } = req.body;
@@ -11,24 +10,23 @@ exports.createCategory = async (req, res) => {
         });
     }
 
+    let payload = {
+        name: name,
+        description: description
+    }
+
     // check if category exists
-    let categoryExists = await Category.findOne({
-        where: {
-            name,
-        },
-    });
+    let categoryExists = await categoryRepository.findCategoryByName(name);
+    console.log(categoryExists)
 
     if (categoryExists) {
         return res.status(400).send({
-            message: 'A Category with the entered Categoryname already exists!',
+            message: 'A Category with the entered category name already exists!',
         });
     }
 
     try {
-        let newCategory = await Category.create({
-            name,
-            description,
-        });
+        let newCategory = await categoryRepository.createCategory(payload);
 
         return res.send(newCategory);
     } catch (err) {
@@ -48,9 +46,7 @@ exports.getAllCategories = async (req, res) => {
     }
 
     try {
-        const categories = await Category.findAll({
-            ...paginate({page, size})
-        });
+        const categories = await categoryRepository.findAllCategories(page, size);
 
         return res.send(categories);
     } catch(err) {
@@ -63,11 +59,7 @@ exports.getAllCategories = async (req, res) => {
 exports.getCategoryById = async (req, res) => {
     const { id } = req.params;
 
-    const category = await Category.findOne({
-        where: {
-            id,
-        },
-    });
+    const category = await categoryRepository.findCategoryById(id);
 
     if (!category) {
         return res.status(404).send({
@@ -85,11 +77,7 @@ exports.updateCategory = async (req, res) => {
 
     const { id } = req.params;
 
-    const category = await Category.findOne({
-        where: {
-            id,
-        },
-    });
+    const category = await categoryRepository.findCategoryById(id);
 
     if (!category) {
         return res.status(400).send({
@@ -126,11 +114,7 @@ exports.deleteCategory = async (req, res) => {
         });
     }
 
-    const category = await Category.findOne({
-        where: {
-            id,
-        },
-    });
+    const category = await categoryRepository.findCategoryById(id);
 
     if (!category) {
         return res.status(404).send({
@@ -139,7 +123,7 @@ exports.deleteCategory = async (req, res) => {
     }
 
     try {
-        await category.destroy();
+        categoryRepository.findByIdAndDelete(id);
 
         return res.send({
             message: `Category ${id} has been deleted!`,

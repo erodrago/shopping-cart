@@ -1,5 +1,5 @@
-const { Discount } = require('../database/models');
-const paginate = require('../helpers/paginate');
+const discountRepository = require('../repository/discount-repository.js');
+
 
 exports.createDiscount = async (req, res) => {
     const { name, description, percentageOff, active } = req.body;
@@ -12,11 +12,7 @@ exports.createDiscount = async (req, res) => {
     }
 
     // check if Discount exists
-    let discountExists = await Discount.findOne({
-        where: {
-            name,
-        },
-    });
+    let discountExists = await discountRepository.findDiscountByName(name);
 
     if (discountExists) {
         return res.status(400).send({
@@ -24,13 +20,15 @@ exports.createDiscount = async (req, res) => {
         });
     }
 
-    try {
-        let newDiscount = await Discount.create({
+    let payload = {
             name,
             description,
             percentageOff,
             active
-        });
+        };
+
+    try {
+        let newDiscount = await discountRepository.createDiscount(payload);
 
         return res.send(newDiscount);
     } catch (err) {
@@ -50,9 +48,7 @@ exports.getAllDiscounts = async (req, res) => {
     }
 
     try {
-        const discounts = await Discount.findAll({
-            ...paginate({page, size})
-        });
+        const discounts = await discountRepository.findAllDiscounts(page, size);
 
         return res.send(discounts);
     } catch(err) {
@@ -65,11 +61,7 @@ exports.getAllDiscounts = async (req, res) => {
 exports.getDiscountById = async (req, res) => {
     const { id } = req.params;
 
-    const discount = await Discount.findOne({
-        where: {
-            id,
-        },
-    });
+    const discount = await discountRepository.findDiscountById(id);
 
     if (!discount) {
         return res.status(404).send({
@@ -87,11 +79,7 @@ exports.updateDiscount = async (req, res) => {
 
     const { id } = req.params;
 
-    const discount = await Discount.findOne({
-        where: {
-            id,
-        },
-    });
+    const discount = await discountRepository.findDiscountById(id);
 
     if (!discount) {
         return res.status(400).send({
@@ -126,11 +114,7 @@ exports.switchDiscountActiveStatus = async (req, res) => {
 
     const { id } = req.params;
 
-    const discount = await Discount.findOne({
-        where: {
-            id,
-        },
-    });
+    const discount = await discountRepository.findDiscountById(id);
 
     if (!discount) {
         return res.status(400).send({
@@ -164,11 +148,7 @@ exports.deleteDiscount = async (req, res) => {
         });
     }
 
-    const discount = await Discount.findOne({
-        where: {
-            id,
-        },
-    });
+    const discount = await discountRepository.findDiscountById(id);
 
     if (!discount) {
         return res.status(404).send({
@@ -177,7 +157,7 @@ exports.deleteDiscount = async (req, res) => {
     }
 
     try {
-        await discount.destroy();
+        await discountRepository.findByIdAndDelete(id);
 
         return res.send({
             message: `Discount with ${id} has been deleted!`,

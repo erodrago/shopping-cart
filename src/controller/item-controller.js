@@ -1,4 +1,11 @@
-const { CartItem, CartSession, Product, Discount} = require('../database/models');
+const orderRepository = require('../repository/order-repository.js');
+const sessionRepository = require('../repository/session-repository.js');
+const paymentRepository = require('../repository/payment-repository.js');
+const cartitemRepository = require('../repository/cartitem-repository.js');
+const orderitemRepository = require('../repository/orderitem-repository.js');
+const productRepository = require('../repository/product-repository.js');
+const userRepository = require('../repository/user-repository.js');
+const discountRepository = require('../repository/discount-repository.js');
 
 exports.addItemToCart = async (req, res) => {
     const { quantity, productId } = req.body;
@@ -12,9 +19,7 @@ exports.addItemToCart = async (req, res) => {
     }
 
     // check if product exists
-    const product = await Product.findOne({
-        where: {id: productId}
-    });
+    const product = await productRepository.findProductById(productId);
 
     if(!product){
         return res.status(404).send({
@@ -23,9 +28,7 @@ exports.addItemToCart = async (req, res) => {
     }
 
     // check if there is an existing session exists
-    const session = await CartSession.findOne({
-        where: {id: sessionId}
-    });
+    const session = await sessionRepository.findSessionById(sessionId);
 
     if(!session){
         return res.status(404).send({
@@ -45,9 +48,7 @@ exports.addItemToCart = async (req, res) => {
     // check if product has a discount
     if (product.discount_id){
 
-        const discount = await Discount.findOne({
-            where: {id: product.discount_id}
-        });
+        const discount = await discountRepository.findDiscountById(product.discount_id);
 
         const productPrice = product.price - ( product.price * discount.percentageOff / 100 );
         amount = quantity * productPrice;
@@ -59,12 +60,7 @@ exports.addItemToCart = async (req, res) => {
     const totalAmount = session.totalAmount + amount;
 
     // check if the item exists and update
-    const cartItem = await CartItem.findOne({
-        where: {
-            session_id: sessionId,
-            product_id: product.id
-        }
-    })
+    const cartItem = await cartitemRepository.findCartItemBySessionAndProduct(sessionId, product.id);
 
     try {
         if(cartItem){
@@ -75,7 +71,7 @@ exports.addItemToCart = async (req, res) => {
             cartItem.save();
         }else {
             // create new cart item
-            await CartItem.create({
+            await cartitemRepository.createCartItem({
                 quantity,
                 amount: amount,
                 product_id: productId,
@@ -109,9 +105,7 @@ exports.removeItemFromCart = async (req, res) => {
     }
 
     // check if there is an existing session exists
-    const session = await CartSession.findOne({
-        where: {id: sessionId}
-    });
+    const session = await sessionRepository.findSessionById(sessionId);
 
     if(!session){
         return res.status(404).send({
@@ -119,11 +113,7 @@ exports.removeItemFromCart = async (req, res) => {
         })
     }
 
-    const cartItem = await CartItem.findOne({
-        where: {
-            id,
-        },
-    });
+    const cartItem = await cartitemRepository.findCartItemById(id);``
 
     if (!cartItem) {
         return res.status(404).send({
@@ -176,13 +166,9 @@ exports.getAllCartItems = async (req, res) => {
 
     // get cart items
     try {
-        const cartItems = await CartItem.findAll({
-            where: {session_id: sessionId}
-        });
+        const cartItems = await cartitemRepository.findAllCartItemsBySession(sessionId);
 
-        const session = await CartSession.findOne({
-            where: {id: sessionId}
-        });
+        const session = await sessionRepository.findSessionById(sessionId);
 
         return res.send({
             cartItems: cartItems,
