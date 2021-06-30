@@ -28,7 +28,7 @@ const UserController = require('../controller/user-controller.js');
  *           type: string
  *           description: password
  *         phoneNumber:
- *           type: integer
+ *           type: string
  *           description: phone number
  */
 
