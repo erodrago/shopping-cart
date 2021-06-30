@@ -119,7 +119,16 @@ or
     
         npm run dev
     
+To run tests
 
+1. Initialize test database:
+    ```
+    npm run db:create:test
+    ```
+2. Run tests
+    ```
+    npm test
+    ```
 ### Documentation
 
 After running the project, to view documentation via swagger, in your browser navigate to: 
