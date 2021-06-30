@@ -28,7 +28,6 @@ describe('Category API', () => {
                 name: 'CLOTHING',
                 description: 'Category for clothes'
             });
-        console.log(res);
         expect(res.statusCode).toEqual(200);
         expect(res.body).toHaveProperty('id');
         id = res.body.id;
