@@ -1,5 +1,6 @@
-const { Product, Category, Discount } = require('../database/models');
-const paginate = require('../helpers/paginate');
+const categoryRepository = require('../repository/category-repository.js');
+const productRepository = require('../repository/product-repository.js');
+const discountRepository = require('../repository/discount-repository.js');
 
 exports.createProduct = async (req, res) => {
     const { name, description, sku, quantity, price, categoryId, discountId } = req.body;
@@ -13,11 +14,7 @@ exports.createProduct = async (req, res) => {
     }
 
     // check if Product exists
-    let productExists = await Product.findOne({
-        where: {
-            name,
-        },
-    });
+    let productExists = await productRepository.findProductByName(name);
 
     if (productExists) {
         return res.status(400).send({
@@ -26,9 +23,7 @@ exports.createProduct = async (req, res) => {
     }
 
     // check if category exists
-    const category = await Category.findOne({
-        where: {id: categoryId}
-    });
+    const category = await categoryRepository.findCategoryById(categoryId);
 
     if(!category){
         return res.status(404).send({
@@ -37,9 +32,7 @@ exports.createProduct = async (req, res) => {
     }
 
     // check if dicount exists
-    const discount = await Discount.findOne({
-        where: {id: discountId}
-    });
+    const discount = await discountRepository.findDiscountById(discountId);
 
     if(!discount){
         return res.status(404).send({
@@ -47,16 +40,19 @@ exports.createProduct = async (req, res) => {
         })
     }
 
+    let payload = {
+        name: name,
+        description: description,
+        sku: sku,
+        quantity: quantity,
+        price: price,
+        category_id: category.id,
+        discount_id: discount.id
+    }
+
     try {
-        let newProduct = await Product.create({
-            name: name,
-            description:description,
-            sku: sku,
-            quantity: quantity,
-            price: price,
-            category_id: category.id,
-            discount_id: discount.id
-        });
+        let newProduct = await productRepository.createProduct(payload);
+
         return res.send(newProduct);
     } catch (err) {
         return res.status(500).send({
@@ -75,10 +71,7 @@ exports.getAllProducts = async (req, res) => {
     }
 
     try {
-        const products = await Product.findAll({
-            ...paginate({page, size}),
-            include: ['discount', 'category'],
-        });
+        const products = await productRepository.findAllProducts(page, size);
 
         return res.send(products);
     } catch(err) {
@@ -91,12 +84,7 @@ exports.getAllProducts = async (req, res) => {
 exports.getProductById = async (req, res) => {
     const { id } = req.params;
 
-    const product = await Product.findOne({
-        where: {
-            id,
-        },
-        include: ['category', 'discount'],
-    });
+    const product = await productRepository.findProductById(id);
 
     if (!product) {
         return res.status(404).send({
@@ -116,11 +104,7 @@ exports.deleteProduct = async (req, res) => {
         });
     }
 
-    const product = await Product.findOne({
-        where: {
-            id,
-        },
-    });
+    const product = await productRepository.findProductById(id);
 
     if (!product) {
         return res.status(404).send({
@@ -129,7 +113,8 @@ exports.deleteProduct = async (req, res) => {
     }
 
     try {
-        await product.destroy();
+        await productRepository.findByIdAndDelete(id);
+
         return res.send({
             message: `Product ${id} has been deleted!`,
         });
@@ -146,11 +131,7 @@ exports.updateProduct = async (req, res) => {
 
     const { id } = req.params;
 
-    const product = await Product.findOne({
-        where: {
-            id,
-        },
-    });
+    const product = await productRepository.findProductById(id);
 
     if (!product) {
         return res.status(400).send({
