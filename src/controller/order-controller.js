@@ -1,5 +1,10 @@
-const { OrderItem, OrderDetail, CartItem, CartSession, PaymentDetail, User, Product } = require('../database/models');
-const paginate = require('../helpers/paginate');
+const orderRepository = require('../repository/order-repository.js');
+const sessionRepository = require('../repository/session-repository.js');
+const paymentRepository = require('../repository/payment-repository.js');
+const cartitemRepository = require('../repository/cartitem-repository.js');
+const orderitemRepository = require('../repository/orderitem-repository.js');
+const productRepository = require('../repository/product-repository.js');
+const userRepository = require('../repository/user-repository.js');
 
 exports.postOrderItems = async (req, res) => {
     const { totalAmount, paymentProvider, status, params } = req.body;
@@ -12,9 +17,7 @@ exports.postOrderItems = async (req, res) => {
     }
 
     //get session infomation
-    const session = await CartSession.findOne({
-        where: {id: sessionId}
-    });
+    const session = await sessionRepository.findSessionById(sessionId);
 
     if(session.totalAmount != totalAmount){
         return res.status(400).send({
@@ -25,7 +28,7 @@ exports.postOrderItems = async (req, res) => {
     // post payment information
     let payment;
     try {
-        payment = await PaymentDetail.create({
+        payment = await paymentRepository.createPaymentDetail({
             amount: totalAmount,
             payment_provider: paymentProvider,
             payment_time: new Date(),
@@ -40,9 +43,7 @@ exports.postOrderItems = async (req, res) => {
     }
 
     // get cart items
-    const cartItems = await CartItem.findAll({
-        where: {session_id: sessionId}
-    })
+    const cartItems = await cartitemRepository.findCartItemBySession(sessionId);
 
     if(!cartItems) {
         return res.status(404).send({
@@ -52,7 +53,7 @@ exports.postOrderItems = async (req, res) => {
 
     
     // create an order
-    let order = await OrderDetail.create({
+    let order = await orderRepository.createOrderDetail({
         user_id: session.user_id,
         totalAmount: session.totalAmount,
         payment_id: payment.id,
@@ -63,20 +64,31 @@ exports.postOrderItems = async (req, res) => {
     try {
         // copy cart items to order items and delete upon succesful purchase
         // bulk save 
-        for(const cartItem of cartItems) {
-            const orderitem = await OrderItem.create({
-                product_id: cartItem.product_id,
-                order_id: order.id,
-                quantity: cartItem.quantity,
-                amount: cartItem.amount
-            })
+        if(Array.isArray(cartItems)){
+            for(const cartItem of cartItems) {
+                const orderitem = await orderitemRepository.createOrderItem({
+                    product_id: cartItem.product_id,
+                    order_id: order.id,
+                    quantity: cartItem.quantity,
+                    amount: cartItem.amount
+                })
+
+                // get product 
+                const product = await productRepository.findProductById(orderitem.product_id);
+
+                product.quantity -= orderitem.quantity;
+                product.save();
+            }
+        }else{
+            const orderitem = await orderitemRepository.createOrderItem({
+                    product_id: cartItems.product_id,
+                    order_id: order.id,
+                    quantity: cartItems.quantity,
+                    amount: cartItems.amount
+                })
 
             // get product 
-            const product = Product.findOne({
-                where: {
-                    product_id: orderitem.product_id
-                }
-            })
+            const product = await productRepository.findProductById(orderitem.product_id);
 
             product.quantity -= orderitem.quantity;
             product.save();
@@ -104,11 +116,7 @@ exports.getUserTransactions = async (req, res) => {
         });
     }
 
-    const user = await User.findOne({
-        where: {
-            uuid: uuid
-        }
-    })
+    const user = await userRepository.findUserById(uuid);
 
     if(!user) {
         return res.status(400).send({
@@ -118,13 +126,7 @@ exports.getUserTransactions = async (req, res) => {
 
 
     try {
-        const orders = await OrderDetail.findAll({
-            where: {
-                    user_id: user.id
-                },
-                ...paginate({page, size}),
-                include: ['orderItems', 'payment']
-        });
+        const orders = await orderRepository.findAllOrderDetailsOfUser(user.id, page, size);
 
         return res.send(orders);
     } catch(err){
