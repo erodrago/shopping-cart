@@ -72,6 +72,8 @@ exports.postOrderItems = async (req, res) => {
                     quantity: cartItem.quantity,
                     amount: cartItem.amount
                 })
+                //remove items from cart table
+                cartItem.destroy();
 
                 // get product 
                 const product = await productRepository.findProductById(orderitem.product_id);
@@ -86,6 +88,10 @@ exports.postOrderItems = async (req, res) => {
                     quantity: cartItems.quantity,
                     amount: cartItems.amount
                 })
+
+
+            //remove items from cart table
+            cartItems.destroy();
 
             // get product 
             const product = await productRepository.findProductById(orderitem.product_id);
