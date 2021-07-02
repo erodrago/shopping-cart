@@ -124,10 +124,10 @@ exports.removeItemFromCart = async (req, res) => {
     // decrease total amount of items
 
     try {
-        if(type=='all'){
-            await cartItem.destroy().then(() => {
-                const totalAmount = session.totalAmount - (cartItem.amount);
+        if(type=='all' || cartItem.quantity == 1){
+            const totalAmount = session.totalAmount - (cartItem.amount);
 
+            await cartItem.destroy().then(() => {
                 session.totalAmount = totalAmount;
                 session.save();
             });
