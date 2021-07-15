@@ -16,6 +16,12 @@ exports.addItemToCart = async (req, res) => {
       return res.status(400).send({ errors: errors.array() });
     }
 
+    if (!quantity) {
+        return res.status(400).send({
+            message: `Quantity should be greater than 0!`,
+        });
+    }
+
     // check if product exists
     const product = await productRepository.findProductById(productId);
 
