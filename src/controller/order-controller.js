@@ -43,14 +43,7 @@ exports.postOrderItems = async (req, res) => {
     }
 
     // get cart items
-    const cartItems = await cartitemRepository.findCartItemBySession(sessionId);
-
-    if(!cartItems) {
-        return res.status(404).send({
-            message: `No cart items found!! please add items to purchase `,
-        });
-    }
-
+    const cartItems = await cartitemRepository.findAllCartItemsBySession(sessionId);
     
     // create an order
     let order = await orderRepository.createOrderDetail({
@@ -65,6 +58,7 @@ exports.postOrderItems = async (req, res) => {
         // copy cart items to order items and delete upon succesful purchase
         // bulk save 
         if(Array.isArray(cartItems)){
+            console.log("ARRAY")
             for(const cartItem of cartItems) {
                 const orderitem = await orderitemRepository.createOrderItem({
                     product_id: cartItem.product_id,
