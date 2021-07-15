@@ -1,4 +1,6 @@
 const router = require('express').Router();
+const { body, check } = require('express-validator');
+
 const ProductController = require('../controller/product-controller');
 
 /**
@@ -71,7 +73,16 @@ const ProductController = require('../controller/product-controller');
  *       500:
  *         description: Server error
  */
-router.post('/create', ProductController.createProduct);
+router.post('/create', 
+            [
+              check('name', 'Name of product is required').not().isEmpty(),
+              check('description', 'Description of product is required').not().isEmpty(),
+              check('sku', 'Stock Keeping Unit (SKU) number is required').not().isEmpty(),
+              check('quantity', 'Quantity of products is required').not().isEmpty(),
+              check('price', 'Price of products is required').not().isEmpty(),
+              check('categoryId', 'Category of products is required').not().isEmpty()
+            ],
+            ProductController.createProduct);
 
 /**
  * @swagger
