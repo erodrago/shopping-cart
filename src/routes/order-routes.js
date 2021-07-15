@@ -28,7 +28,6 @@ const OrderController = require('../controller/order-controller');
  *           description: return body from the payment provider
  *       example:
  *         totalAmount: 300
- *         orderTime: 2/3/2021
  *         paymentProvider: paystack
  *         status: true
  *         params: payment succesful
