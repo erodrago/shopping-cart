@@ -1,6 +1,7 @@
 const router = require('express').Router();
-const OrderController = require('../controller/order-controller');
+const { check } = require('express-validator');
 
+const OrderController = require('../controller/order-controller');
 
 /**
  * @swagger
@@ -106,7 +107,15 @@ const OrderController = require('../controller/order-controller');
  *       500:
  *         description: Server error
  */
-router.post('/session/:sessionId/pay', OrderController.postOrderItems);
+router.post('/session/:sessionId/pay', 
+            [
+              check('totalAmount', 'Total amount is required').not().isEmpty(),
+              check('paymentProvider', 'Payment provider details is required').not().isEmpty(),
+              check('status', 'Status of payment is required').not().isEmpty(),
+              check('params', 'Dump of payment provider response is required').not().isEmpty(),
+              check('sessionId', 'Customer session is required').not().isEmpty()
+            ],
+            OrderController.postOrderItems);
 
 /**
  * @swagger

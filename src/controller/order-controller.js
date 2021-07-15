@@ -6,14 +6,17 @@ const orderitemRepository = require('../repository/orderitem-repository.js');
 const productRepository = require('../repository/product-repository.js');
 const userRepository = require('../repository/user-repository.js');
 
+const { validationResult } = require('express-validator');
+
 exports.postOrderItems = async (req, res) => {
     const { totalAmount, paymentProvider, status, params } = req.body;
     const { sessionId } = req.params;
 
-    if (!totalAmount || totalAmount == 0 || !paymentProvider || !status || !params || !sessionId) {
-        return res.status(400).send({
-            message: 'Please provide totalAmount, paymentProvider, status and params of item to delete',
-        });
+    // validate body
+    const errors = validationResult(req);
+    
+    if (!errors.isEmpty()) {
+      return res.status(400).send({ errors: errors.array() });
     }
 
     //get session infomation
@@ -44,6 +47,12 @@ exports.postOrderItems = async (req, res) => {
 
     // get cart items
     const cartItems = await cartitemRepository.findAllCartItemsBySession(sessionId);
+
+    if(cartItems.length == 0) {
+        return res.status(404).send({
+            message: `No cart items provided to purchase`
+        })
+    }
     
     // create an order
     let order = await orderRepository.createOrderDetail({

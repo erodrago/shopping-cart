@@ -1,4 +1,6 @@
 const router = require('express').Router();
+const { body, check } = require('express-validator');
+
 const UserController = require('../controller/user-controller.js');
 
 
@@ -64,7 +66,16 @@ const UserController = require('../controller/user-controller.js');
  *       500:
  *         description: Server error
  */
-router.post('/create', UserController.createUser);
+router.post('/create', 
+            body('username', 'username should be an email').isEmail(),
+            body('password', 'password minimum length is 5').isLength({ min: 5 }),
+            [
+              check('username', 'username is required').not().isEmpty(),
+              check('password', 'password is required').not().isEmpty(),
+              check('phoneNumber', 'phone number is required').not().isEmpty(),
+              check('firstName', 'firstname is required').not().isEmpty()
+            ],
+            UserController.createUser);
 
 /**
  * @swagger

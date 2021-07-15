@@ -1,14 +1,16 @@
 const userRepository = require('../repository/user-repository.js');
 const sessionRepository = require('../repository/session-repository.js');
 
+const { validationResult } = require('express-validator');
+
 exports.createUser = async (req, res) => {
     const { firstName, lastName, username, password, phoneNumber} = req.body;
     
     // validate body
-    if (!username || !password || !firstName) {
-        return res.status(400).send({
-            message: 'Please provide a firstname, username and a password to create a user!',
-        });
+    const errors = validationResult(req);
+    
+    if (!errors.isEmpty()) {
+      return res.status(400).send({ errors: errors.array() });
     }
 
     // check if user exists

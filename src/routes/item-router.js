@@ -1,4 +1,6 @@
 const router = require('express').Router();
+const { check } = require('express-validator');
+
 const ItemController = require('../controller/item-controller');
 
 /**
@@ -57,7 +59,13 @@ const ItemController = require('../controller/item-controller');
  *       500:
  *         description: Server error
  */
-router.post('/session/:sessionId/item/add', ItemController.addItemToCart);
+router.post('/session/:sessionId/item/add',
+            [
+              check('quantity', 'Quantity is required, Please specify quantity of items to purchase').not().isEmpty(),
+              check('sessionId', 'Session ID of customer is required').not().isEmpty(),
+              check('productId', 'Product ID is required').not().isEmpty()
+            ], 
+            ItemController.addItemToCart);
 
 /**
  * @swagger

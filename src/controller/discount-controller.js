@@ -1,14 +1,15 @@
 const discountRepository = require('../repository/discount-repository.js');
 
+const { validationResult } = require('express-validator');
 
 exports.createDiscount = async (req, res) => {
     const { name, description, percentageOff, active } = req.body;
     
     // validate body
-    if (!name || !description, !percentageOff) {
-        return res.status(400).send({
-            message: 'Please provide a name, discreption and the percentage off to create a Discount!',
-        });
+    const errors = validationResult(req);
+    
+    if (!errors.isEmpty()) {
+      return res.status(400).send({ errors: errors.array() });
     }
 
     // check if Discount exists

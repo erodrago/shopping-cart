@@ -1,21 +1,19 @@
-const orderRepository = require('../repository/order-repository.js');
 const sessionRepository = require('../repository/session-repository.js');
-const paymentRepository = require('../repository/payment-repository.js');
 const cartitemRepository = require('../repository/cartitem-repository.js');
-const orderitemRepository = require('../repository/orderitem-repository.js');
 const productRepository = require('../repository/product-repository.js');
-const userRepository = require('../repository/user-repository.js');
 const discountRepository = require('../repository/discount-repository.js');
+
+const { validationResult } = require('express-validator');
 
 exports.addItemToCart = async (req, res) => {
     const { quantity, productId } = req.body;
     const { sessionId } = req.params;
 
     // validate body
-    if (!quantity || !productId || !sessionId) {
-        return res.status(400).send({
-            message: `Quantity and/or product required have not been provided!`,
-        });
+    const errors = validationResult(req);
+    
+    if (!errors.isEmpty()) {
+      return res.status(400).send({ errors: errors.array() });
     }
 
     // check if product exists

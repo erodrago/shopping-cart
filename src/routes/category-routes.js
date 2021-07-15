@@ -1,4 +1,6 @@
 const router = require('express').Router();
+const { check } = require('express-validator');
+
 const CategoryController = require('../controller/category-controller.js');
 
 /**
@@ -77,7 +79,12 @@ const CategoryController = require('../controller/category-controller.js');
  *       500:
  *         description: Server error
  */
-router.post('/create', CategoryController.createCategory);
+router.post('/create',
+            [
+              check('name', 'Name of category is required').not().isEmpty(),
+              check('description', 'Description of category is required').not().isEmpty()
+            ], 
+            CategoryController.createCategory);
 
 /**
  * @swagger

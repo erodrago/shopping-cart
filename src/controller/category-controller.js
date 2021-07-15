@@ -1,13 +1,15 @@
 const categoryRepository = require('../repository/category-repository.js')
 
+const { validationResult } = require('express-validator');
+
 exports.createCategory = async (req, res) => {
     const { name, description } = req.body;
     
     // validate body
-    if (!name || !description) {
-        return res.status(400).send({
-            message: 'Please provide a name and description to create a Category!',
-        });
+    const errors = validationResult(req);
+    
+    if (!errors.isEmpty()) {
+      return res.status(400).send({ errors: errors.array() });
     }
 
     let payload = {
