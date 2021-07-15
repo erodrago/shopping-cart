@@ -18,7 +18,7 @@ describe('Category API', () => {
                 name: 'CLOTHING',
             });
         expect(res.statusCode).toEqual(400);
-        expect(res.body).toHaveProperty('message');
+        expect(res.body).toHaveProperty('errors');
     }),
 
     it('should create a new category', async () => {
