@@ -66,35 +66,15 @@ exports.postOrderItems = async (req, res) => {
     try {
         // copy cart items to order items and delete upon succesful purchase
         // bulk save 
-        if(Array.isArray(cartItems)){
-            console.log("ARRAY")
-            for(const cartItem of cartItems) {
-                const orderitem = await orderitemRepository.createOrderItem({
-                    product_id: cartItem.product_id,
-                    order_id: order.id,
-                    quantity: cartItem.quantity,
-                    amount: cartItem.amount
-                })
-                //remove items from cart table
-                cartItem.destroy();
-
-                // get product 
-                const product = await productRepository.findProductById(orderitem.product_id);
-
-                product.quantity -= orderitem.quantity;
-                product.save();
-            }
-        }else{
+        for(const cartItem of cartItems) {
             const orderitem = await orderitemRepository.createOrderItem({
-                    product_id: cartItems.product_id,
-                    order_id: order.id,
-                    quantity: cartItems.quantity,
-                    amount: cartItems.amount
-                })
-
-
+                product_id: cartItem.product_id,
+                order_id: order.id,
+                quantity: cartItem.quantity,
+                amount: cartItem.amount
+            })
             //remove items from cart table
-            cartItems.destroy();
+            cartItem.destroy();
 
             // get product 
             const product = await productRepository.findProductById(orderitem.product_id);
@@ -102,6 +82,8 @@ exports.postOrderItems = async (req, res) => {
             product.quantity -= orderitem.quantity;
             product.save();
         }
+        
+        
         // reset session
         session.totalAmount = 0;
 
