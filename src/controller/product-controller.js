@@ -2,15 +2,16 @@ const categoryRepository = require('../repository/category-repository.js');
 const productRepository = require('../repository/product-repository.js');
 const discountRepository = require('../repository/discount-repository.js');
 
+const { validationResult } = require('express-validator');
+
 exports.createProduct = async (req, res) => {
     const { name, description, sku, quantity, price, categoryId, discountId } = req.body;
     
     // validate body
-    if (!name || !description || !sku || !quantity || !price || !categoryId || !discountId) {
-        return res.status(400).send({
-            message: `Please provide a name, description, sku, quantity, and price 
-            to create a Product!`,
-        });
+    const errors = validationResult(req);
+    
+    if (!errors.isEmpty()) {
+      return res.status(400).send({ errors: errors.array() });
     }
 
     // check if Product exists
@@ -31,13 +32,17 @@ exports.createProduct = async (req, res) => {
         })
     }
 
-    // check if dicount exists
-    const discount = await discountRepository.findDiscountById(discountId);
+    let discount;
 
-    if(!discount){
-        return res.status(404).send({
-            message: `The discount with id ${discountId} does not exist!`
-        })
+    if(discountId){
+        // check if dicount exists
+        discount = await discountRepository.findDiscountById(discountId);
+
+        if(!discount){
+            return res.status(404).send({
+                message: `The discount with id ${discountId} does not exist!`
+            })
+        }
     }
 
     let payload = {

@@ -80,7 +80,7 @@ In this section we discuss how to setup and run the application locally.
 ### Prerequisites
 You should have npm and mysql installed.
 
-### Installation
+### Installation and setup
 
 1. Clone the repo
     ```sh
@@ -92,11 +92,7 @@ You should have npm and mysql installed.
     npm install
     ```
 
-3. Set up database table by running:
-    ```
-    npm run db:setup
-    ```
-4. Enter your DB configurations in `.env` file. the format of the dot env as described in .env.example
+3. Enter your DB configurations in `.env` file. the format of the dot env as described in .env.example
     ```JS
         DATABASE=db_name
         DATABASE_USER=db_username
@@ -105,6 +101,11 @@ You should have npm and mysql installed.
         DATABASE_DIALECT=mysql
 
         PORT=3000
+    ```
+
+4. Set up database table by running:
+    ```
+    npm run db:setup
     ```
 
 ### Run on local machine

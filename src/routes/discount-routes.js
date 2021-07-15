@@ -1,4 +1,6 @@
 const router = require('express').Router();
+const { check } = require('express-validator');
+
 const DiscountController = require('../controller/discount-controller.js');
 
 /**
@@ -93,7 +95,12 @@ const DiscountController = require('../controller/discount-controller.js');
  *       500:
  *         description: Server error
  */
-router.post('/create', DiscountController.createDiscount);
+router.post('/create', 
+            [
+              check('name', 'Name of discount is required').not().isEmpty(),
+              check('description', 'Description of discount is required').not().isEmpty()
+            ], 
+            DiscountController.createDiscount);
 
 
 /**

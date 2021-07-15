@@ -6,14 +6,17 @@ const orderitemRepository = require('../repository/orderitem-repository.js');
 const productRepository = require('../repository/product-repository.js');
 const userRepository = require('../repository/user-repository.js');
 
+const { validationResult } = require('express-validator');
+
 exports.postOrderItems = async (req, res) => {
     const { totalAmount, paymentProvider, status, params } = req.body;
     const { sessionId } = req.params;
 
-    if (!totalAmount || totalAmount == 0 || !paymentProvider || !status || !params || !sessionId) {
-        return res.status(400).send({
-            message: 'Please provide totalAmount, paymentProvider, status and params of item to delete',
-        });
+    // validate body
+    const errors = validationResult(req);
+    
+    if (!errors.isEmpty()) {
+      return res.status(400).send({ errors: errors.array() });
     }
 
     //get session infomation
@@ -43,14 +46,13 @@ exports.postOrderItems = async (req, res) => {
     }
 
     // get cart items
-    const cartItems = await cartitemRepository.findCartItemBySession(sessionId);
+    const cartItems = await cartitemRepository.findAllCartItemsBySession(sessionId);
 
-    if(!cartItems) {
+    if(cartItems.length == 0) {
         return res.status(404).send({
-            message: `No cart items found!! please add items to purchase `,
-        });
+            message: `No cart items provided to purchase`
+        })
     }
-
     
     // create an order
     let order = await orderRepository.createOrderDetail({
@@ -64,34 +66,15 @@ exports.postOrderItems = async (req, res) => {
     try {
         // copy cart items to order items and delete upon succesful purchase
         // bulk save 
-        if(Array.isArray(cartItems)){
-            for(const cartItem of cartItems) {
-                const orderitem = await orderitemRepository.createOrderItem({
-                    product_id: cartItem.product_id,
-                    order_id: order.id,
-                    quantity: cartItem.quantity,
-                    amount: cartItem.amount
-                })
-                //remove items from cart table
-                cartItem.destroy();
-
-                // get product 
-                const product = await productRepository.findProductById(orderitem.product_id);
-
-                product.quantity -= orderitem.quantity;
-                product.save();
-            }
-        }else{
+        for(const cartItem of cartItems) {
             const orderitem = await orderitemRepository.createOrderItem({
-                    product_id: cartItems.product_id,
-                    order_id: order.id,
-                    quantity: cartItems.quantity,
-                    amount: cartItems.amount
-                })
-
-
+                product_id: cartItem.product_id,
+                order_id: order.id,
+                quantity: cartItem.quantity,
+                amount: cartItem.amount
+            })
             //remove items from cart table
-            cartItems.destroy();
+            cartItem.destroy();
 
             // get product 
             const product = await productRepository.findProductById(orderitem.product_id);
@@ -99,6 +82,8 @@ exports.postOrderItems = async (req, res) => {
             product.quantity -= orderitem.quantity;
             product.save();
         }
+        
+        
         // reset session
         session.totalAmount = 0;
 
